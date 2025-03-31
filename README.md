@@ -1,2 +1,2 @@
 # Automatada Python
- Grupo e
+ Grupo e: Caparros Joaquín, Giménez Axel, Mengarelli Luciano
