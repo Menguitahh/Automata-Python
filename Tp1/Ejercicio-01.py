@@ -36,18 +36,11 @@ import re as re
 # Se pueden utilizar funciones auxiliares si se deseara, pero recordar que el resultado se evaluará llamando a la función validate_string
 
 def validate_string(s):
+    has_alphanumeric = bool(re.search(r"[a-zA-Z0-9]", s))  #! Contiene al menos un caracter alfanumerico
+    has_letter = bool(re.search(r"[a-zA-Z]", s))           #! Contiene al menos una letra
+    has_uppercase = bool(re.search(r"[A-Z]", s))           #! Contiene almenos una mayuscula
+    has_lowercase = bool(re.search(r"[a-z]", s))           #! Contiene almenos una minuscula
+    has_digit = bool(re.search(r"\d", s))                  #! Contiene almenos un digito
+    has_min_chars = len(s) >= 8                            #! Contiene 8 o mas caracteres
 
-    has_alphanumeric = any(char.isalnum() for char in s)       # Contiene al menos un caracter alfanumerico
-    has_letter = any(char.isalpha() for char in s)    # Contiene al menos una letra
-    has_uppercase = any(char.isupper() for char in s)  # Contiene almenos una mayuscula
-    has_lowercase = any(char.islower() for char in s)  # Contiene almenos una minuscula
-    has_digit = any(char.isdigit() for char in s)    # Contiene almenos un digito
-    has_min_chars = len(s) >= 8  # Contiene 8 o mas caracteres
     return has_alphanumeric, has_letter, has_uppercase, has_lowercase, has_digit, has_min_chars
-
-
-if __name__ == "__main__":
-    test_strings = ["xYz8", "xy@z!", "Abc12345", "12345678", "ABCDEFG", "abcdefg"]
-    
-    for test in test_strings:
-        print(f"'{test}' → {validate_string(test)}")
