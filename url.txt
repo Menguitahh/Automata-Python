@@ -1,0 +1,10 @@
+https://www.google.com
+http://example.org
+www.youtube.com/watch?v=abcd1234
+https://github.com/user/repo?tab=readme
+http://my-site.net/index.html
+htp://invalid-url.com 
+//missing-protocol.com 
+https//missing-colon.com
+http://incomplete 
+http:/wrong-slash.com 
