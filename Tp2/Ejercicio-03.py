@@ -28,26 +28,26 @@ class AFN:
                         pila.append(e)
         return clausura
 
-# Definición del AFN para (a|b)*(a|b|ε)
-estados = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
+# Definimos el AFN
+estados = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'}
 alfabeto = {'a', 'b'}
 transiciones = {
     '0': {'ε': {'1'}},
-    '1': {'ε': {'2', '4', '7'}},
-    '2': {'a': {'3'}},
-    '3': {'ε': {'6'}},
-    '4': {'b': {'5'}},
+    '1': {'ε': {'2', '3', '6'}},
+    '2': {'a': {'4'}},
+    '4': {'ε': {'6'}},
+    '3': {'b': {'5'}},
     '5': {'ε': {'6'}},
-    '6': {'ε': {'1'}},
-    '7': {'a': {'8'}},
-    '8': {'ε': {'9'}},
-    '7': {'b': {'8'}},  # también se puede pasar a 'b'
-    '7': {'ε': {'9'}},  # también epsilon
+    '6': {'ε': {'1', '7'}},
+    '7': {'a': {'8'}, 'b': {'9'}, 'ε': {'10'}},
+    '8': {'ε': {'10'}},
+    '9': {'ε': {'10'}},
 }
 estado_inicial = '0'
-estados_aceptacion = {'9'}
+estados_aceptacion = {'10'}
 
 afn = AFN(estados, alfabeto, transiciones, estado_inicial, estados_aceptacion)
+
 
 
 #! Ejercicio 3 punto 3
@@ -94,6 +94,7 @@ def convertir_afn_a_afd(afn):
 afd = convertir_afn_a_afd(afn)
 
 
+
 #! Ejercicio 3 punto 4
 
 
@@ -115,12 +116,14 @@ class AFD_Simulador:
             estado_actual = self.transiciones[estado_actual][simbolo]
         return estado_actual in self.estados_aceptacion
 
+# Crear simulador
 simulador_afd = AFD_Simulador(afd)
 
-# Probar
+# Pruebas
 cadenas = ['a', 'b', '', 'ab', 'ba', 'aba', 'bb', 'aab', 'aabbababab', 'ad', 'abdbb']
 for cadena in cadenas:
     if simulador_afd.acepta(cadena):
         print(f'La cadena "{cadena}" es aceptada.')
     else:
         print(f'La cadena "{cadena}" NO es aceptada.')
+
