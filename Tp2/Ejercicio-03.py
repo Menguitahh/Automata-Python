@@ -48,6 +48,29 @@ estados_aceptacion = {'10'}
 
 afn = AFN(estados, alfabeto, transiciones, estado_inicial, estados_aceptacion)
 
+# ===============================================
+# Simular manualmente si una cadena es aceptada
+# ===============================================
+
+def acepta_afn(afn, cadena):
+    estados_actuales = afn.epsilon_clausura({afn.estado_inicial})
+    for simbolo in cadena:
+        estados_actuales = afn.epsilon_clausura(afn.mover(estados_actuales, simbolo))
+    return bool(estados_actuales & afn.estados_aceptacion)
+
+# ===============================================
+# Probar aceptación de cadenas
+# ===============================================
+
+print("\nPruebas de aceptación de cadenas:")
+
+cadenas = ['a', 'b', '', 'ab', 'ba', 'aba', 'bb', 'aab', 'aabbababab', 'ad', 'abdbb', 'aaaa', 'bbbb']
+
+for cadena in cadenas:
+    if acepta_afn(afn, cadena):
+        print(f'✅ La cadena \"{cadena}\" es aceptada.')
+    else:
+        print(f'❌ La cadena \"{cadena}\" NO es aceptada.')
 
 #! Ejercicio 3 punto 4
 
