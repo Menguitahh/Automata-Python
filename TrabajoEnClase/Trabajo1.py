@@ -16,7 +16,7 @@ def buscar_titulo():
 
         coincidencias = []
         for fila in lector:
-            if texto in fila["title"].lower():
+            if fila["title"].lower().startswith(texto):
                 coincidencias.append(fila)
 
         if coincidencias:
@@ -43,21 +43,31 @@ def buscar_plataforma_categoria():
         "4": "18+"
     }
 
-    print("\nPlataformas disponibles:")
-    for key, value in plataformas.items():
-        print(f"{key}. {value.title()}")
-    plataforma_key = input("Seleccione una plataforma (1-4): ")
-    plataforma = plataformas.get(plataforma_key, "")
+    # Seleccionar plataforma válida
+    plataforma_key = ""
+    while plataforma_key not in plataformas:
+        print("\nPlataformas disponibles:")
+        for key, value in plataformas.items():
+            print(f"{key}. {value.title()}")
+        plataforma_key = input("Seleccione una plataforma (1-4): ").strip()
+        if plataforma_key not in plataformas:
+            print("❌ Entrada inválida. Ingrese un número del 1 al 4.")
 
-    print("\nCategorías disponibles:")
-    for key, value in categorias.items():
-        print(f"{key}. {value}")
-    categoria = categorias.get(input("Seleccione una categoría (1-4): "), "")
+    plataforma = plataformas[plataforma_key]
 
-    if not plataforma or not categoria:
-        print("Error: Selección inválida.")
-        return
+    # Seleccionar categoría válida
+    categoria_key = ""
+    while categoria_key not in categorias:
+        print("\nCategorías disponibles:")
+        for key, value in categorias.items():
+            print(f"{key}. {value}")
+        categoria_key = input("Seleccione una categoría (1-4): ").strip()
+        if categoria_key not in categorias:
+            print("❌ Entrada inválida. Ingrese un número del 1 al 4.")
 
+    categoria = categorias[categoria_key]
+
+    # Leer y filtrar CSV
     with open("movies.csv", 'r', encoding='utf-8') as archivo:
         lector = csv.DictReader(archivo)
         filtradas = []
@@ -66,35 +76,51 @@ def buscar_plataforma_categoria():
             if valor_plataforma and valor_plataforma.strip() == "1" and fila["age"].strip() == categoria:
                 filtradas.append(fila)
 
-
         ordenadas = sorted(filtradas, key=rating_as_float, reverse=True)[:10]
 
-        print(f"\nTop 10 en {plataforma.title()} ({categoria}):")
+        print(f"\n🎬 Top 10 en {plataforma.title()} ({categoria}):")
         for i, p in enumerate(ordenadas, 1):
             print(f"{i}. {p['title']} - Rating: {p['rating']}")
 
-def validar_pelicula(pelicula):
-    errores = []
-    try:
-        año = int(pelicula["year"])
-        if not (1900 <= año <= 2026):
-            errores.append("año invalido.")
-    except:
-        errores.append("año no es un numero valido.")
-
-    if rating_as_float(pelicula["rating"]) == 0.0:
-        errores.append("puntuacion invalida. usa formato como '85/100'.")
-
-    if not pelicula["age"].endswith("+"):
-        errores.append("categoría debe ser '7+', '13+', etc.")
-    return errores
-
 def agregar_pelicula():
-    titulo = input("titulo: ")
-    año = input("año: ")
-    categoria = input("categoria (ej. 7+, 13+, 16+ , 18+): ")
-    puntuacion = input("puntuacion (formato '90/100'): ")
+    titulo = input("🎬 Título: ").strip()
 
+    # Validar año
+    while True:
+        año = input("📅 Año (1900–2025): ").strip()
+        if not año.isdigit():
+            print("❌ El año debe ser un número.")
+            continue
+        año = int(año)
+        if 1900 <= año <= 2025:
+            break
+        print("❌ Año fuera de rango. Debe estar entre 1900 y 2025.")
+
+    # Validar categoría
+    categorias_validas = {"7+", "13+", "16+", "18+"}
+    while True:
+        categoria = input("🔞 Categoría (7+, 13+, 16+, 18+): ").strip()
+        if categoria in categorias_validas:
+            break
+        print("❌ Categoría inválida. Debe ser una de: 7+, 13+, 16+, 18+")
+
+    # Validar puntuación
+    while True:
+        puntuacion = input("⭐ Puntuación (ej. '90/100' o solo '90'): ").strip()
+        if '/' in puntuacion:
+            partes = puntuacion.split('/')
+            if len(partes) == 2 and partes[1] == '100' and partes[0].isdigit():
+                break
+            else:
+                print("❌ Formato inválido. Debe ser como '90/100' o solo '90'.")
+        elif puntuacion.isdigit():
+            puntuacion += "/100"
+            break
+        else:
+            print("❌ La puntuación debe ser un número entero o estar en formato '90/100'.")
+
+    
+    # Validar plataforma
     plataformas = {
         "netflix": "0",
         "hulu": "0",
@@ -102,16 +128,20 @@ def agregar_pelicula():
         "disney+": "0"
     }
 
-    plataforma_input = input("plataforma (Netflix/Hulu/Prime Video/Disney+): ").strip().lower()
-    if plataforma_input in plataformas:
-        plataformas[plataforma_input] = "1"
-    else:
-        print("plataforma no valida.")
-        return
+    while True:
+        plataforma_input = input("📺 Plataforma (Netflix, Hulu, Prime Video, Disney+): ").strip().lower()
+        if plataforma_input in plataformas:
+            plataformas[plataforma_input] = "1"
+            break
+        else:
+            print("❌ Plataforma no válida. Opciones válidas:")
+            for p in plataformas:
+                print(f"  - {p.title()}")
 
+    # Armar registro nuevo
     nueva = {
         "title": titulo,
-        "year": año,
+        "year": str(año),
         "age": categoria,
         "rating": puntuacion,
         "netflix": plataformas["netflix"],
@@ -120,17 +150,13 @@ def agregar_pelicula():
         "disney+": plataformas["disney+"]
     }
 
-    errores = validar_pelicula(nueva)
-    if errores:
-        print("errores:")
-        for e in errores:
-            print(f"- {e}")
-        return
-
+    # Guardar en CSV
     with open("movies.csv", 'a', newline='', encoding='utf-8') as archivo:
-        escritor = csv.DictWriter(archivo, fieldnames=["title", "year", "age", "rating", "netflix", "hulu", "prime video", "disney+"])
+        campos = ["title", "year", "age", "rating", "netflix", "hulu", "prime video", "disney+"]
+        escritor = csv.DictWriter(archivo, fieldnames=campos)
         escritor.writerow(nueva)
-    print("la pelicula se agrego correctamente")
+
+    print("✅ La película se agregó correctamente.")
 
 
 def menu():
