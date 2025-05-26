@@ -20,6 +20,7 @@ def convert_duration(ms):
         return "00:00:00"  # Por defecto si hay error
 
 
+#!PARTE 1
 def search_title_or_artist():
 
     while True:
@@ -78,24 +79,96 @@ def search_title_or_artist():
                 print("No se encontraron coincidencias.")
 
 
+#!PARTE 2
+def validating_data(fila):
+    Uri = r"^spotify:track:[\w\d]+$"
+    Url_spotify = r"^https?://(?:open\.)?spotify\.com/\/[\w\d]+$"
+    Url_youtube = r"https?://(?:www\.?youtube\.com|youtu\.be)/[\w\d]+$"
 
+    if not re.match(Uri, fila['Url_spotify']):
+        return print(f"URL de Spotify inválida: {fila['Url_spotify']}")
+    if not re.match(Url_spotify, fila['Url_spotify']):
+        return print(f"URL de Spotify inválida: {fila['url_spotify']}")
+    if not re.match(Url_youtube, fila['Url_youtube']):
+        return print(f"URL de YouTube inválida: {fila['url_youtube']}")
+    
+    if int(fila['likes']) > int(fila['views']):
+
+        return print("Los Likes no pueden ser mayores que las visitas.")
+    return True    
+    
+def insert_from_csv(name_file):
+        with open(name_file, 'r', encoding='utf-8') as archivo:
+            lector = csv.DictReader(archivo)
+            for fila in lector:
+                fila['Duration_ms'] = convert_duration(fila['Duration_ms'])
+                if fila['Likes'].strip() == '' or fila['Views'].strip() == '':
+                    print("Fila con datos faltantes, se omite:", fila)
+                    continue
+                fila['Uri'] = (fila['Uri']).strip()
+                fila['Track'] = (fila['Track'])
+                fila['Url_spotify'] = fila['Url_spotify'].strip()
+                fila['Url_youtube'] = fila['Url_youtube'].strip()
+                fila['Artist'] = fila['Artist'].strip()
+                fila['Album'] = fila['Album'].strip()
+                
+            
+            if validating_data(fila):
+                print("Registro válido:", fila)
+            else:
+                print("Registro inválido:", fila)
+                
+
+def manual_insert():
+    Artist = input("Ingrese el nombre del artista: ")
+    Track = input("Ingrese el título de la canción: ")
+    Album = input("Ingrese el nombre del álbum: ")
+    Uri = input("URI Sportify: ")
+    Duration_ms = input("Ingrese la duración (en milisegundos): ")
+    Views = input("Ingrese la cantidad de vistas: ")
+    Likes = input("Ingrese la cantidad de likes: ")
+    Url_spotify = input("Ingrese la URL de Spotify: ")
+    Url_youtube = input("Ingrese la URL de YouTube: ")
+        
+        
+    fila = {
+        'Artist': Artist,
+        'Track': Track,
+        'Album': Album,
+        'Iri': Uri,
+        'Duration_ms': Duration_ms,
+        'Views': Views,
+        'Likes': Likes,
+        'Url_spotify': Url_spotify,
+        'Url_youtube': Url_youtube
+    }
+        
+    valido, error = validating_data(fila)
+    if valido:
+        print("Registro válido:", fila)
+    else:
+            print("Registro inválido:", error)
+
+
+#!PARTE 3
 def top_10_artist():
     name = input("Ingresa el artista: ")
     songs = []
 
-    with open("spotify_and_youtube.csv", "r", encoding="utf-8") as file:
-        lector = csv.DictReader(file)
+    with open("spotify_and_youtube.csv", "r", encoding="utf-8") as archivo:
+        lector = csv.DictReader(archivo)
         for row in lector:
-            if re.search(name, row["Artist"], re.IGNORECASE): #re.IGNORECASE es para indicar q la busqueda no distinga entre mayusculas y minusculas
+            artist = row["Artist"].strip().lower()
+            if artist == name:
                 songs.append(row)
 
     if not songs:
-        print("No se encontraron canciones")
+        print("No se encontraron artistas. Verificá si lo escribiste bien.")
         return
 
     def views_float(row):
         try:
-            return float(row["Views"]) #asegura que se puede ordenar correctamente por vistas, incluso si los datos tienen errores
+            return float(row["Views"]) # asegura que se puede ordenar correctamente por vistas, incluso si los datos tienen errores
         except (ValueError, TypeError):
             return 0
 
@@ -108,6 +181,7 @@ def top_10_artist():
         print(f"{i}. {song['Artist']} - {song['Track']} | Duración: {duration} | Reproducciones: {round(views, 2)} millones")
 
 
+#!PARTE 4
 def show_albums():
     artist_input = input("Ingrese el nombre del artista: ").strip()
     albums = {}
@@ -139,7 +213,7 @@ def show_albums():
     
     print(f"\n{artist_input} tiene {len(albums)} álbum(es):\n")
     
-    for i, (album_name, data) in enumerate(albums.items(), 1):
+    for i, (album_name, data) in enumerate(albums.items(), 1): #!El enumerate permite agregar un número de orden empezando desde 1.
         duration = convert_duration(data["total_duration"])
         print(f"{i}. Álbum: {album_name}")
         print(f"   - Canciones: {data['songs']}")
@@ -151,9 +225,10 @@ def menu():
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Buscar por Título o Artista")
         print("2. Mostrar Top 10 canciones de un Artista")
-        print("3. Insertar nuevo registro (manual o desde archivo)")
-        print("4. Mostrar Álbumes de un Artista")
-        print("5. Salir")
+        print("3. Insertar nuevo registro (desde archivo)")
+        print("4. Insertar nuevo registro (manualmente)")
+        print("5. Mostrar Álbumes de un Artista")
+        print("6. Salir")
         print("----------------------")
 
         option = input("seleccione una opcion: ")
@@ -163,10 +238,15 @@ def menu():
         elif option == "2":
             top_10_artist()
         elif option == "3":
-            print("Cerrando la app...")
+            name_file = input("Ingrese el nombre del archivo CSV: ")
+            if not name_file.endswith('.csv'):
+                name_file += '.csv'
         elif option == "4":
-            show_albums()
+            print("insertando registro manual...")
+            manual_insert()
         elif option == "5":
+            show_albums()
+        elif option == "6":
             print("Cerrando la app...")
             break
         else:
