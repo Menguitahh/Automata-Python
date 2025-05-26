@@ -1,6 +1,5 @@
 import re
 import csv
-from datetime import timedelta
 
 # Funcion para convertir milisegundos a horas, minutos y segundos
 def convert_duration(ms):
@@ -22,17 +21,18 @@ def top_10_artist():
 
     with open("spotify_and_youtube.csv", "r", encoding="utf-8") as archivo:
         lector = csv.DictReader(archivo)
-        for fila in lector:
-            if re.search(name, fila["Artist"], re.IGNORECASE): #re.IGNORECASE es para indicar q la busqueda no distinga entre mayusculas y minusculas
-                songs.append(fila)
+        for row in lector:
+            artist = row["Artist"].strip().lower()
+            if artist == name:
+                songs.append(row)
 
     if not songs:
-        print("No se encontraron canciones")
+        print("No se encontraron artistas. Verificá si lo escribiste bien.")
         return
 
-    def views_float(fila):
+    def views_float(row):
         try:
-            return float(fila["Views"]) #asegura que se puede ordenar correctamente por vistas, incluso si los datos tienen errores
+            return float(row["Views"]) # asegura que se puede ordenar correctamente por vistas, incluso si los datos tienen errores
         except (ValueError, TypeError):
             return 0
 
@@ -43,7 +43,6 @@ def top_10_artist():
         duration = convert_duration(song["Duration_ms"])
         views = float(song["Views"]) / 1_000_000 if song["Views"] else 0
         print(f"{i}. {song['Artist']} - {song['Track']} | Duración: {duration} | Reproducciones: {round(views, 2)} millones")
-
 
 
 def menu():
@@ -59,17 +58,17 @@ def menu():
         print("5  Salir\n")
         print("-"*40)
 
-        opcion = input("Opción elegida: ")
+        option = input("Opción elegida: ")
 
-        if opcion == "1":
+        if option == "1":
             print("Cerrando la app...")
-        elif opcion == "2":
+        elif option == "2":
             top_10_artist()
-        elif opcion == "3":
+        elif option == "3":
             print("Cerrando la app...")
-        elif opcion == "4":
+        elif option == "4":
             print("Cerrando la app...")
-        elif opcion == "5":
+        elif option == "5":
             print("\nGracias por usar el sistema! ;)\n")
             break
         else:
