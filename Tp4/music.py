@@ -1,6 +1,7 @@
 import re
 import csv
 from datetime import timedelta
+import os
 
     
 # Funcion para convertir milisegundos a horas, minutos y segundos
@@ -80,74 +81,139 @@ def search_title_or_artist():
 
 
 #!PARTE 2
+
 def validating_data(fila):
     Uri = r"^spotify:track:[\w\d]+$"
-    Url_spotify = r"^https?://(?:open\.)?spotify\.com/\/[\w\d]+$"
-    Url_youtube = r"https?://(?:www\.?youtube\.com|youtu\.be)/[\w\d]+$"
+    Url_spotify = r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[\w\d]+$"
+    Url_youtube = r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[\w\d]+"
 
-    if not re.match(Uri, fila['Url_spotify']):
-        return print(f"URL de Spotify inválida: {fila['Url_spotify']}")
-    if not re.match(Url_spotify, fila['Url_spotify']):
-        return print(f"URL de Spotify inválida: {fila['url_spotify']}")
-    if not re.match(Url_youtube, fila['Url_youtube']):
-        return print(f"URL de YouTube inválida: {fila['url_youtube']}")
+    if not re.match(Uri, fila.get('Uri', '')):
+        return False, f"URI de Spotify inválida: {fila.get('Uri', '')}"
+    if not re.match(Url_spotify, fila.get('Url_spotify', '')):
+        return False, f"URL de Spotify inválida: {fila.get('Url_spotify', '')}"
+    if not re.match(Url_youtube, fila.get('Url_youtube', '')):
+        return False, f"URL de YouTube inválida: {fila.get('Url_youtube', '')}"
     
-    if int(fila['likes']) > int(fila['views']):
+    try:
+        likes = int(float(fila.get('Likes', 0)))
+        views = int(float(fila.get('Views', 0)))
+        if likes > views:
+            return False, "Los Likes no pueden ser mayores que las visitas."
+    except Exception as e:
+        return False, f"Error al convertir Likes o Views a entero: {e}"
 
-        return print("Los Likes no pueden ser mayores que las visitas.")
-    return True    
-    
+    return True, None
+
+
 def insert_from_csv(name_file):
-        with open(name_file, 'r', encoding='utf-8') as archivo:
-            lector = csv.DictReader(archivo)
-            for fila in lector:
-                fila['Duration_ms'] = convert_duration(fila['Duration_ms'])
-                if fila['Likes'].strip() == '' or fila['Views'].strip() == '':
-                    print("Fila con datos faltantes, se omite:", fila)
-                    continue
-                fila['Uri'] = (fila['Uri']).strip()
-                fila['Track'] = (fila['Track'])
-                fila['Url_spotify'] = fila['Url_spotify'].strip()
-                fila['Url_youtube'] = fila['Url_youtube'].strip()
-                fila['Artist'] = fila['Artist'].strip()
-                fila['Album'] = fila['Album'].strip()
-                
-            
-            if validating_data(fila):
+    path_destino = "spotify_and_youtube.csv"
+
+    print(f"Leyendo encabezados del archivo destino: {path_destino}")
+    with open(path_destino, 'r', encoding='utf-8') as destino:
+        encabezados = next(csv.reader(destino))
+        print("Encabezados detectados:", encabezados)
+
+    print(f"Abriendo archivo de origen: {name_file}")
+    with open(name_file, 'r', encoding='utf-8') as archivo_origen:
+        lector = csv.DictReader(archivo_origen)
+        filas_validas = []
+
+        for i, fila in enumerate(lector, 1):
+            print(f"\nProcesando fila #{i}")
+            fila['Duration_ms'] = convert_duration(fila['Duration_ms'])
+
+            if fila['Likes'].strip() == '' or fila['Views'].strip() == '':
+                print("⚠️ Fila con datos faltantes, se omite:", fila)
+                continue
+
+            fila['Uri'] = fila['Uri'].strip()
+            fila['Track'] = fila['Track'].strip()
+            fila['Url_spotify'] = fila['Url_spotify'].strip()
+            fila['Url_youtube'] = fila['Url_youtube'].strip()
+            fila['Artist'] = fila['Artist'].strip()
+            fila['Album'] = fila['Album'].strip()
+
+            valido, error = validating_data(fila)
+            if valido:
                 print("Registro válido:", fila)
+                filas_validas.append(fila)
             else:
-                print("Registro inválido:", fila)
-                
+                print("Registro inválido:", error)
+
+    if filas_validas:
+        print(f"\nAgregando {len(filas_validas)} filas válidas al archivo destino.")
+        with open(path_destino, 'a', newline='', encoding='utf-8') as destino:
+            writer = csv.DictWriter(destino, fieldnames=encabezados)
+            for fila in filas_validas:
+                writer.writerow(fila)
+        print("Agregado con éxito.")
+    else:
+        print("No hay filas válidas para agregar.")
+
 
 def manual_insert():
+    def Request_field(mensaje, validacion=None, error_msg="Valor inválido. Intente nuevamente."):
+        while True:
+            value = input(mensaje)
+            if validacion is None or validacion(value):
+                return value
+            else:
+                print(error_msg)
+
+    def validating_uri(uri):
+        return re.match(r"^spotify:track:[\w\d]+$", uri)
+
+    def validating_url_spotify(url):
+        return re.match(r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[\w\d]+$", url)
+
+    def validating_url_youtube(url):
+        return re.match(r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[\w\d]+", url)
+
+    def validating_entero(entrada):
+        return entrada.isdigit()
+
     Artist = input("Ingrese el nombre del artista: ")
     Track = input("Ingrese el título de la canción: ")
     Album = input("Ingrese el nombre del álbum: ")
-    Uri = input("URI Sportify: ")
-    Duration_ms = input("Ingrese la duración (en milisegundos): ")
-    Views = input("Ingrese la cantidad de vistas: ")
-    Likes = input("Ingrese la cantidad de likes: ")
-    Url_spotify = input("Ingrese la URL de Spotify: ")
-    Url_youtube = input("Ingrese la URL de YouTube: ")
-        
-        
+    
+    Uri = Request_field("URI Spotify: ", validating_uri, "URI de Spotify inválida. Debe tener el formato spotify:track:ID")
+    Duration_ms = Request_field("Ingrese la duración (en milisegundos): ", validating_entero, "Debe ser un número entero")
+    Views = Request_field("Ingrese la cantidad de vistas: ", validating_entero, "Debe ser un número entero")
+    Likes = Request_field("Ingrese la cantidad de likes: ", validating_entero, "Debe ser un número entero")
+    Url_spotify = Request_field("Ingrese la URL de Spotify: ", validating_url_spotify, "URL de Spotify inválida.")
+    Url_youtube = Request_field("Ingrese la URL de YouTube: ", validating_url_youtube, "URL de YouTube inválida.")
+    
     fila = {
         'Artist': Artist,
+        'Url_spotify': Url_spotify,
         'Track': Track,
         'Album': Album,
-        'Iri': Uri,
+        'Uri': Uri,
         'Duration_ms': Duration_ms,
         'Views': Views,
         'Likes': Likes,
-        'Url_spotify': Url_spotify,
         'Url_youtube': Url_youtube
     }
-        
-    valido, error = validating_data(fila)
-    if valido:
+
+    valid, error = validating_data(fila)
+    if valid:
         print("Registro válido:", fila)
+        try:
+            # Leer los encabezados desde el archivo CSV original
+            path_csv = "spotify_and_youtube.csv"
+            with open(path_csv, 'r', encoding='utf-8') as f:
+                encabezados = next(csv.reader(f))
+
+            # Escribir la fila nueva respetando los encabezados del archivo
+            with open(path_csv, 'a', newline='', encoding='utf-8') as archivo:
+                writer = csv.DictWriter(archivo, fieldnames=encabezados)
+                writer.writerow(fila)
+
+            print("Registro agregado al archivo CSV en el orden correcto.")
+        except Exception as e:
+            print("Error al escribir en el archivo CSV:", e)
     else:
-            print("Registro inválido:", error)
+        print("Registro inválido:", error)
 
 
 #!PARTE 3
@@ -239,8 +305,9 @@ def menu():
             top_10_artist()
         elif option == "3":
             name_file = input("Ingrese el nombre del archivo CSV: ")
-            if not name_file.endswith('.csv'):
-                name_file += '.csv'
+            name_file = os.path.join(name_file)
+            insert_from_csv(name_file)
+
         elif option == "4":
             print("insertando registro manual...")
             manual_insert()
