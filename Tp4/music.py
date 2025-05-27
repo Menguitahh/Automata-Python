@@ -240,7 +240,7 @@ def top_10_artist():
 
     top_10 = sorted(songs, key=views_float, reverse=True)[:10]
 
-    print(f"\n Top 10 canciones más reproducidas de {name.title()}:\n")
+    print(f"\nTop 10 canciones más reproducidas de {name.title()}:\n")
     for i, song in enumerate(top_10, 1):
         duration = convert_duration(song["Duration_ms"])
         views = float(song["Views"]) / 1_000_000 if song["Views"] else 0
