@@ -1,6 +1,5 @@
 import re
 import csv
-from datetime import timedelta
 import os
 
     
@@ -21,7 +20,7 @@ def convert_duration(ms):
         return "00:00:00"  # Por defecto si hay error
 
 
-#!PARTE 1
+#!PARTE 1 Funcion buscar por titulo o artista
 def search_title_or_artist():
 
     while True:
@@ -80,7 +79,7 @@ def search_title_or_artist():
                 print("No se encontraron coincidencias.")
 
 
-#!PARTE 2
+#!PARTE 2 Validacion datos y carga desde archivo CSV
 
 def validating_data(fila):
     Uri = r"^spotify:track:[\w\d]+$"
@@ -94,7 +93,7 @@ def validating_data(fila):
     if not re.match(Url_youtube, fila.get('Url_youtube', '')):
         return False, f"URL de YouTube inválida: {fila.get('Url_youtube', '')}"
     
-    try:
+    try: # Convierte likes y views a enteros para comparar
         likes = int(float(fila.get('Likes', 0)))
         views = int(float(fila.get('Views', 0)))
         if likes > views:
@@ -126,6 +125,7 @@ def insert_from_csv(name_file):
                 print("⚠️ Fila con datos faltantes, se omite:", fila)
                 continue
 
+                # elimina espacios en blanco
             fila['Uri'] = fila['Uri'].strip()
             fila['Track'] = fila['Track'].strip()
             fila['Url_spotify'] = fila['Url_spotify'].strip()
@@ -247,7 +247,7 @@ def top_10_artist():
         print(f"{i}. {song['Artist']} - {song['Track']} | Duración: {duration} | Reproducciones: {round(views, 2)} millones")
 
 
-#!PARTE 4
+#!PARTE 4 mostrar los albumes de un artista
 def show_albums():
     artist_input = input("Ingrese el nombre del artista: ").strip()
     albums = {}
