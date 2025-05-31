@@ -216,7 +216,7 @@ def manual_insert():
         print("Registro inválido:", error)
 
 
-#!PARTE 3
+#!PARTE 3 top 10 canciones de artista
 def top_10_artist():
     name = input("Ingresa el artista: ")
     songs = []
