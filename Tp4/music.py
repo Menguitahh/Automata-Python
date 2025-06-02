@@ -127,7 +127,7 @@ def insert_from_csv(name_file):
             fila['Duration_ms'] = convert_duration(fila['Duration_ms'])
 
             if fila['Likes'].strip() == '' or fila['Views'].strip() == '':
-                print("⚠️ Fila con datos faltantes, se omite:", fila)
+                print("Fila con datos faltantes, se omite:", fila)
                 continue
 
                 # elimina espacios en blanco
