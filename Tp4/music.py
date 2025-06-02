@@ -83,9 +83,9 @@ def search_title_or_artist():
 #!PARTE 2
 
 def validating_data(fila):
-    Uri = r"^spotify:track:[\w\d]+$"
-    Url_spotify = r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[\w\d]+$"
-    Url_youtube = r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[\w\d]+"
+    Uri = r"^spotify:track:[a-zA-Z0-9]+$"
+    Url_spotify = r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[a-zA-Z0-9]+$"
+    Url_youtube = r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[a-zA-Z0-9_\-]+"
 
     if not re.match(Uri, fila.get('Uri', '')):
         return False, f"URI de Spotify inválida: {fila.get('Uri', '')}"
@@ -305,7 +305,7 @@ def menu():
             top_10_artist()
         elif option == "3":
             name_file = input("Ingrese el nombre del archivo CSV: ")
-            name_file = os.path.join(name_file)
+            name_file = os.path.join(name_file + ".csv")
             insert_from_csv(name_file)
 
         elif option == "4":
