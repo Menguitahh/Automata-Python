@@ -183,8 +183,13 @@ def manual_insert():
     
     Uri = Request_field("URI Spotify: ", validating_uri, "URI de Spotify inválida. Debe tener el formato spotify:track:ID")
     Duration_ms = Request_field("Ingrese la duración (en milisegundos): ", validating_entero, "Debe ser un número entero")
-    Views = Request_field("Ingrese la cantidad de vistas: ", validating_entero, "Debe ser un número entero")
-    Likes = Request_field("Ingrese la cantidad de likes: ", validating_entero, "Debe ser un número entero")
+    while True:
+        Views = Request_field("Ingrese la cantidad de vistas: ", validating_entero, "Debe ser un número entero")
+        Likes = Request_field("Ingrese la cantidad de likes: ", validating_entero, "Debe ser un número entero")
+        if int(Views)  > int(Likes) > 0:
+            break
+        else:
+            print("Los likes no pueden ser mayores que las vistas.")
     Url_spotify = Request_field("Ingrese la URL de Spotify: ", validating_url_spotify, "URL de Spotify inválida.")
     Url_youtube = Request_field("Ingrese la URL de YouTube: ", validating_url_youtube, "URL de YouTube inválida.")
     
