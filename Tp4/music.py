@@ -161,13 +161,13 @@ def manual_insert():
                 print(error_msg)
 
     def validating_uri(uri):
-        return re.match(r"^spotify:track:[\w\d]+$", uri)
+        return re.match(r"^spotify:track:[a-zA-Z0-9]+$", uri)
 
     def validating_url_spotify(url):
-        return re.match(r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[\w\d]+$", url)
+        return re.match(r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[a-zA-Z0-9]+$", url)
 
     def validating_url_youtube(url):
-        return re.match(r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[\w\d]+", url)
+        return re.match(r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[a-zA-Z0-9_\-]+", url)
 
     def validating_entero(entrada):
         return entrada.isdigit()
