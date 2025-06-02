@@ -84,7 +84,12 @@ def search_title_or_artist():
 
 def validating_data(fila):
     Uri = r"^spotify:track:[a-zA-Z0-9]+$"
+    
+    
     Url_spotify = r"^https?://(?:open\.)?spotify\.com/(track|album|artist|playlist)/[a-zA-Z0-9]+$"
+    
+    
+    
     Url_youtube = r"^https?://(?:www\.)?(youtube\.com|youtu\.be)/[a-zA-Z0-9_\-]+"
 
     if not re.match(Uri, fila.get('Uri', '')):
@@ -306,7 +311,11 @@ def menu():
         elif option == "3":
             name_file = input("Ingrese el nombre del archivo CSV: ")
             name_file = os.path.join(name_file + ".csv")
-            insert_from_csv(name_file)
+            if not os.path.exists(name_file):
+                print(f"El archivo {name_file} no existe.")
+                continue
+            else:
+                insert_from_csv(name_file)
 
         elif option == "4":
             print("insertando registro manual...")
